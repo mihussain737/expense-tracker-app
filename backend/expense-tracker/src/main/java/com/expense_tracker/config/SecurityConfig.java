@@ -1,6 +1,7 @@
 package com.expense_tracker.config;
 
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,10 +26,12 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/register"
                         ).permitAll()
-                        //.anyRequest().authenticated()
                 );
+        http.authorizeHttpRequests(auth->auth
+                .requestMatchers("/api/expense/**").authenticated());
                 http.httpBasic(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults());
+
 
         return http.build();
     }
@@ -44,5 +47,10 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public ModelMapper modelMapper(){
+        return new ModelMapper();
     }
 }
