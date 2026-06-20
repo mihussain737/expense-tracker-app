@@ -7,6 +7,10 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,9 +22,14 @@ public class ExpenseController {
     @Autowired
     private ExpenseService expenseService;
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     @PostMapping
     public ResponseEntity<ExpenseDto> addExpense(@Valid @RequestBody ExpenseDto expenseDto) {
-        ExpenseDto savedExpense = expenseService.saveExpense(expenseDto);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        ExpenseDto savedExpense = expenseService.saveExpense(username,expenseDto);
         return new ResponseEntity<>(savedExpense, HttpStatus.CREATED);
     }
 
@@ -34,25 +43,33 @@ public class ExpenseController {
             @RequestParam(name = "sortOrder", defaultValue = "asc", required = false) String sortOrder
     ) {
 //        List<ExpenseDto> savedExpenses = expenseService.findAllExpenses();
-        ExpenseResponse savedExpenses = expenseService.findAllExpenses(pageNumber, pageSize, sortBy, sortOrder);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        ExpenseResponse savedExpenses = expenseService.findAllExpenses(pageNumber, pageSize, sortBy, sortOrder,username);
         return new ResponseEntity<>(savedExpenses, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ExpenseDto>  findExpenseById(@PathVariable Long id) {
-        ExpenseDto expenseDto = expenseService.findExpenseById(id);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        ExpenseDto expenseDto = expenseService.findExpenseById(id,username);
         return ResponseEntity.ok(expenseDto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteExpenseById(@PathVariable Long id) {
-        String message = expenseService.deleteExpenseById(id);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        String message = expenseService.deleteExpenseById(id,username);
         return ResponseEntity.ok(message);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ExpenseDto> updateExpense(@PathVariable Long id,@RequestBody ExpenseDto expenseDto) {
-        ExpenseDto updatedExpense = expenseService.updateExpense(id, expenseDto);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        ExpenseDto updatedExpense = expenseService.updateExpense(id, expenseDto, username);
         return new ResponseEntity<>(updatedExpense, HttpStatus.OK);
     }
 }
