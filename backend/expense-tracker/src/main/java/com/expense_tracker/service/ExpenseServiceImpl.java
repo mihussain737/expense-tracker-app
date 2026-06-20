@@ -3,9 +3,14 @@ package com.expense_tracker.service;
 import com.expense_tracker.entity.Expense;
 import com.expense_tracker.exceptionHandling.ResourceNotFoundException;
 import com.expense_tracker.modal.ExpenseDto;
+import com.expense_tracker.modal.ExpenseResponse;
 import com.expense_tracker.repository.ExpenseRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,11 +38,25 @@ public class ExpenseServiceImpl implements ExpenseService{
     }
 
     @Override
-    public List<ExpenseDto> findAllExpenses() {
-        List<Expense> expenses = expenseRepository.findAll();
+    public ExpenseResponse findAllExpenses(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sortByAndOrder=sortOrder.equalsIgnoreCase("asc")?Sort.by(sortBy).ascending():
+                Sort.by(sortBy).descending();
+
+        Pageable pageable= PageRequest.of(pageNumber, pageSize,sortByAndOrder);
+
+        Page<Expense> expensePage = expenseRepository.findAll(pageable);
+        List<Expense> allExpenses = expensePage.getContent();
         List<ExpenseDto> expenseDtos = new ArrayList<>();
-        expenses.forEach(expense->expenseDtos.add(modelMapper.map(expense, ExpenseDto.class)));
-        return expenseDtos;
+        allExpenses.forEach(expense->expenseDtos.add(modelMapper.map(expense, ExpenseDto.class)));
+
+        ExpenseResponse expenseResponse=new ExpenseResponse();
+        expenseResponse.setContent(expenseDtos);
+        expenseResponse.setPageNumber(expensePage.getNumber());
+        expenseResponse.setPageSize(expensePage.getSize());
+        expenseResponse.setTotalPages(expensePage.getTotalPages());
+        expenseResponse.setTotalElements(expensePage.getTotalElements());
+        expenseResponse.setIsLastPage(expensePage.isLast());
+        return expenseResponse;
     }
 
     @Override
