@@ -31,32 +31,18 @@ public class UserController {
     @PostMapping("/api/auth/login")
     public ResponseEntity<Map> loginUser(
             @RequestBody LoginUserDto loginUserDto) {
-        System.out.println("Username from DTO: " + loginUserDto.getUsername());
-        System.out.println("Password from DTO: " + loginUserDto.getPassword());
 
         Authentication authentication =
                 authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                loginUserDto.getUsername(),
-                                loginUserDto.getPassword()
-                        )
-                );
+                        new UsernamePasswordAuthenticationToken(loginUserDto.getUsername(),
+                                loginUserDto.getPassword()));
 
         if(authentication.isAuthenticated()){
-            return ResponseEntity.ok(
-                    Map.of(
-                            "message", "Login Successful"
-                    )
-            );
+            return ResponseEntity.ok(Map.of("message", "Login Successful"));
         }
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(
-                        Map.of(
-                                "message", "Invalid Credentials"
-                        )
-                );
-
+                .body(Map.of("message", "Invalid Credentials"));
     }
 
     @PostMapping("/api/auth/register")
