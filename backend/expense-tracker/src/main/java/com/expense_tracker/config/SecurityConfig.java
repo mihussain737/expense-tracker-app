@@ -19,20 +19,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/login",
-                                "/api/auth/register"
-                        ).permitAll()
-                );
+                        .requestMatchers("/api/auth/login","/api/auth/register"
+                        ).permitAll());
         http.authorizeHttpRequests(auth->auth
                 .requestMatchers("/api/expense/**").authenticated());
-                http.httpBasic(Customizer.withDefaults())
+        http.httpBasic(cs->cs.disable())
                 .formLogin(Customizer.withDefaults());
-
-
         return http.build();
     }
 
@@ -40,7 +34,6 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration)
             throws Exception {
-
         return configuration.getAuthenticationManager();
     }
 
