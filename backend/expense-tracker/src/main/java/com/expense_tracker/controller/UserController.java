@@ -3,6 +3,7 @@ package com.expense_tracker.controller;
 import com.expense_tracker.entity.User;
 import com.expense_tracker.modal.LoginUserDto;
 import com.expense_tracker.repository.UserRepository;
+import com.expense_tracker.security.JwtUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,21 +31,27 @@ public class UserController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+     private JwtUtils jwtUtils;
+
     @PostMapping("/api/auth/login")
     public ResponseEntity<Map> loginUser(
             @RequestBody LoginUserDto loginUserDto) {
 
-        Authentication authentication =
-                authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(loginUserDto.getUsername(),
-                                loginUserDto.getPassword()));
 
-        if(authentication.isAuthenticated()){
-            return ResponseEntity.ok(Map.of("message", "Login Successful"));
-        }
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "Invalid Credentials"));
+        Authentication authentication =authenticationManager.authenticate(new
+                UsernamePasswordAuthenticationToken (loginUserDto.getUsername(), loginUserDto.getPassword()));
+
+        SecurityContextHolder.getContext()
+                .setAuthentication(authentication);
+
+        UserDetails userDetails =
+                (UserDetails) authentication.getPrincipal();
+
+        String jwt =
+                jwtUtils.generateTokenFromUsername(userDetails);
+
+        return ResponseEntity.ok(Map.of("jwtToken", jwt,"username", userDetails.getUsername()));
     }
 
     @PostMapping("/api/auth/register")
