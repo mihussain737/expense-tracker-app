@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "users")
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
@@ -23,4 +25,7 @@ public class User {
     @Column(nullable = false)
     private String firstName;
     private String lastName;
+
+    @OneToMany(mappedBy = "user")
+    private List<Expense> expenses;
 }
