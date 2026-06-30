@@ -14,12 +14,13 @@ const Navbar = () => {
           </li>
           <li
             className={`${path === "/expense" ? "text-slate-500 font-semibold" : "text-white"}`}
-            
           >
             <Link to="/expense">Expense</Link>
           </li>
-          <li>
-            <Link>Reports</Link>
+          <li
+            className={`${path === "/expense" ? "text-slate-500 font-semibold" : "text-white"}`}
+          >
+            <Link to="/reports">Reports</Link>
           </li>
           <li>
             <Link>Admin</Link>
